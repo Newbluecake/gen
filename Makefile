@@ -3,7 +3,7 @@
 export CC := clang
 export CXX := clang++
 
-LLVM_CONFIG ?= llvm-config
+LLVM_CONFIG ?= /usr/lib/llvm-14/bin/llvm-config
 CGO_CFLAGS=
 CGO_LDFLAGS=$(strip -L$(shell ${LLVM_CONFIG} --libdir) -Wl,-rpath,$(shell ${LLVM_CONFIG} --libdir))
 
