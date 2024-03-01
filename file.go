@@ -2,8 +2,10 @@ package gen
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 	"text/template"
 
 	"golang.org/x/tools/imports"
@@ -64,6 +66,29 @@ type {{$s.Name}} struct {
 {{end}}
 `))
 
+type GenerateWaiter struct {
+	sync.WaitGroup
+	Errors []error
+	Mu     sync.Mutex
+}
+
+var GenWaiter = &GenerateWaiter{}
+
+func (g *GenerateWaiter) AddError(err error) {
+	g.Mu.Lock()
+	fmt.Println(err)
+	g.Errors = append(g.Errors, err)
+	g.Mu.Unlock()
+}
+
+func (g *GenerateWaiter) GetErrors() error {
+	if len(g.Errors) == 0 {
+		return nil
+	}
+
+	return fmt.Errorf("errors: %v", g.Errors)
+}
+
 // Generate generates file.
 func (f *File) Generate() error {
 	for _, e := range f.Enums {
@@ -108,15 +133,29 @@ func (f *File) Generate() error {
 
 	bo := b.Bytes()
 	bo = bytes.ReplaceAll(bo, []byte(`#include "./clang/`), []byte(`#include "./`))
-	out, err := imports.Process(filename, bo, nil)
-	if err != nil {
-		// Write the file anyway so we can look at the problem
-		if err := os.WriteFile(filename, bo, 0600); err != nil {
-			return err
+	GenWaiter.Add(1)
+	go func() {
+		defer GenWaiter.Done()
+		fmt.Println("try import ", filename)
+		out, err := imports.Process(filename, bo, nil)
+		if err != nil {
+			fmt.Println("failed to import ", filename, err)
+			// Write the file anyway so we can look at the problem
+			if err := os.WriteFile(filename, bo, 0600); err != nil {
+				GenWaiter.AddError(err)
+				return
+			}
+
+			GenWaiter.AddError(err)
+			return
 		}
 
-		return err
-	}
+		fmt.Printf("file %s is successfully imported\n", filename)
 
-	return os.WriteFile(filename, out, 0600)
+		if err := os.WriteFile(filename, out, 0600); err != nil {
+			GenWaiter.AddError(err)
+		}
+	}()
+
+	return nil
 }

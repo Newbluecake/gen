@@ -256,7 +256,8 @@ func (g *Generation) Generate() error {
 		}
 	}
 
-	return nil
+	GenWaiter.Wait()
+	return GenWaiter.GetErrors()
 }
 
 // GenerateMethod method generation.
