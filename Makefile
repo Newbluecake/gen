@@ -14,3 +14,6 @@ test:
 
 coverage:
 	CGO_CFLAGS='${CGO_CFLAGS}' CGO_LDFLAGS='${CGO_LDFLAGS}' go test -v -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
+
+install:
+	CGO_CFLAGS='${CGO_CFLAGS}' CGO_LDFLAGS='${CGO_LDFLAGS}' go build -o ${GOPATH}/bin/go-clang-gen ./cmd/go-clang-gen

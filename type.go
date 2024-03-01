@@ -102,7 +102,8 @@ func TypeFromClangType(cType clang.Type) (Type, error) {
 		typ.CGoName = CSChar
 		typ.GoName = GoInt8
 
-	case clang.Type_Char_U:
+	// FIXME: I guess UChar and Char_U are the same, but I'm not sure
+	case clang.Type_Char_U, clang.Type_UChar:
 		typ.CGoName = CUChar
 		typ.GoName = GoUInt8
 
