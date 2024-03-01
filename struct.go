@@ -116,6 +116,10 @@ func (s *Struct) AddFieldGetters() error {
 			continue
 		}
 
+		if m.CName == "" {
+			continue
+		}
+
 		f := NewFunction(m.CName, s.CName, m.Comment, m.CName, m.Type)
 
 		if !s.ContainsMethod(f.Name) {
