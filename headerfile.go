@@ -68,7 +68,12 @@ func (h *HeaderFile) PrepareFile() error {
 	}
 
 	if incl := "#include <stdint.h>"; !strings.HasPrefix(fs, incl) { // include for uintptr_t
-		fs = "#include <stdint.h>\n\n" + fs
+		prefix := "#include <stdint.h>\n"
+		prefix += "#ifndef _UINTPTR_T\n"
+		prefix += "  typedef __UINTPTR_TYPE__ uintptr_t;\n"
+		prefix += "#define _UINTPTR_T\n"
+		prefix += "#endif\n\n"
+		fs = prefix + fs
 	}
 
 	if err = os.WriteFile(h.FullPath(), []byte(fs), 0600); err != nil {
