@@ -55,6 +55,10 @@ func HandleStructCursor(cursor clang.Cursor, cname string, cnameIsTypeDef bool) 
 				return clang.ChildVisit_Continue
 			}
 
+			if cursor.IsBitField() {
+				typ.IsBitField = true
+			}
+
 			field := &StructField{
 				CName: cursor.DisplayName(),
 				Type:  typ,
@@ -113,6 +117,10 @@ func (s *Struct) AddFieldGetters() error {
 		}
 
 		if m.Type.IsArray { // TODO(go-clang): generate arrays with the correct size and type https://github.com/go-clang/gen/issues/48
+			continue
+		}
+
+		if m.Type.IsBitField {
 			continue
 		}
 

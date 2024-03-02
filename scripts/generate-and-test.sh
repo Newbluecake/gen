@@ -16,6 +16,9 @@ rm -f *_gen.go
 
 go-clang-gen
 
+cp -r clang/* .
+rm clang -rf
+
 cd ..
 
 # Change versions in files

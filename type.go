@@ -83,6 +83,9 @@ type Type struct {
 
 	// IsPointerComposition whether the this Type is pointer composition
 	IsPointerComposition bool
+
+	// IsBitField whether the this Type is bit field
+	IsBitField bool
 }
 
 // TypeFromClangType returns the Type from Clang type.
@@ -95,6 +98,7 @@ func TypeFromClangType(cType clang.Type) (Type, error) {
 		ArraySize:         -1,
 		IsEnumLiteral:     false,
 		IsFunctionPointer: false,
+		IsBitField:        false,
 	}
 
 	switch cType.Kind() {
